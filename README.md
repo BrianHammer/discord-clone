@@ -7,6 +7,9 @@ https://www.youtube.com/watch?v=ZbX4Ok9YX94&list=PLkx0g5BAwUTs4dlP4Tqj9GkOnHL1IQ
 
 Default NEXTJS readme
 
+
+CONTINUE AT 4:01:47
+
 ## Getting Started
 
 First, run the development server:

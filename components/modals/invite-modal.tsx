@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-modal-store";
+import { useState } from "react";
+import axios from "axios";
 
 // UI
 import {
@@ -13,17 +15,44 @@ import {
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { useOrigin } from "@/hooks/use-origin";
 
 // Form validation for creating a new server
 
 export const InviteModal = () => {
-  const { isOpen, onClose, type, data } = useModal();
+  const { onOpen, isOpen, onClose, type, data } = useModal();
   const origin = useOrigin();
 
   const isModalOpen = isOpen && type == "invite";
   const { server } = data;
+
+  const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onCopy = () => {
+    navigator.clipboard.writeText(inviteUrl);
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 1000);
+  };
+
+  const onNew = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.patch(
+        `/api/servers/${server?.id}/invite-code`
+      );
+
+      onOpen("invite", { server: response.data });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Undefined?? 3:45:30
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
@@ -46,9 +75,14 @@ export const InviteModal = () => {
             <Input
               className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
               value={inviteUrl}
+              disabled={isLoading}
             />
-            <Button size="icon">
-              <Copy className="w-4 h-4" />
+            <Button disabled={isLoading} size="icon" onClick={onCopy}>
+              {copied ? (
+                <Check className="w-4 h-4 " />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
             </Button>
           </div>
           {/* TODO: FIX the root issue with the link. Temp fix = ml-20 in button 
@@ -56,6 +90,8 @@ export const InviteModal = () => {
           
           */}
           <Button
+            onClick={onNew}
+            disabled={isLoading}
             size="icon"
             variant="link"
             className="text-xs text-zinc-500 ml-20 mt-4"
